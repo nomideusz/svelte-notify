@@ -1,6 +1,6 @@
 {
   "name": "@nomideusz/svelte-notify",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Email notification template library for the @nomideusz booking platform.",
   "type": "module",
   "sideEffects": false,
