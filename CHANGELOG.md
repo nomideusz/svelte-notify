@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 — 2026-08-03
+
+### Added
+- Demo site at https://svelte-notify.vercel.app/ — live template previewer with
+  language switching and QR toggle. `homepage` now points at it.
+
 ## 0.2.1 — 2026-08-03
 
 ### Changed
