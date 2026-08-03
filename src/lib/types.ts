@@ -22,6 +22,8 @@ export interface BookingNotificationData {
   overrides?: NotifyOverrides;
   /** Optional booking verification URL — if provided, a QR code is inlined in the email. */
   verifyUrl?: string;
+  /** Guest's own page (all bookings/passes) — rendered as a manage link when set */
+  manageUrl?: string;
   /**
    * Optional hosted QR image URL (PNG). Preferred over the inline data-URI
    * fallback — most email clients (Gmail, Outlook) strip data: images.

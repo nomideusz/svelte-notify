@@ -40,6 +40,7 @@ export function bookingConfirmationTemplate(data: BookingNotificationData): Emai
       </ul>
       ${qrSection}
       <p>${t('b_see_you')}</p>
+      ${data.manageUrl ? `<p style="font-size:13px;">${t('b_manage')}<br/><a href="${data.manageUrl}">${data.manageUrl}</a></p>` : ''}
       ${data.brand ? `<hr/>\n      <p style="font-size:12px;color:#666">${data.brand}</p>` : ''}
     `,
   };

@@ -44,6 +44,7 @@ export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
     b_ref: 'Reference',
     b_qr_hint: 'Show this QR code at the entrance',
     b_see_you: 'See you there!',
+    b_manage: 'Your bookings and passes, all in one place:',
 
     p_subject: 'New booking: {service} — {participants} participant(s)',
     p_heading: 'New booking received',
@@ -77,6 +78,7 @@ export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
     b_ref: 'Numer rezerwacji',
     b_qr_hint: 'Pokaż ten kod QR przy wejściu',
     b_see_you: 'Do zobaczenia!',
+    b_manage: 'Twoje zapisy i karnety w jednym miejscu:',
 
     p_subject: 'Nowa rezerwacja: {service} — {participants} os.',
     p_heading: 'Nowa rezerwacja',
@@ -110,6 +112,7 @@ export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
     b_ref: 'Номер бронювання',
     b_qr_hint: 'Покажіть цей QR-код на вході',
     b_see_you: 'До зустрічі!',
+    b_manage: 'Ваші записи й абонементи в одному місці:',
 
     p_subject: 'Нове бронювання: {service} — {participants} ос.',
     p_heading: 'Нове бронювання',

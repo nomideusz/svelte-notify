@@ -1,6 +1,6 @@
 # @nomideusz/svelte-notify
 
-[![npm](https://badgen.net/npm/v/@nomideusz/svelte-notify)](https://www.npmjs.com/package/@nomideusz/svelte-notify) [![license](https://badgen.net/badge/license/MIT/blue)](./LICENSE)
+[![npm](https://badgen.net/npm/v/@nomideusz/svelte-notify)](https://www.npmjs.com/package/@nomideusz/svelte-notify) [![license](https://badgen.net/badge/license/MIT/blue)](https://github.com/nomideusz/svelte-notify/blob/main/LICENSE)
 
 Transactional email templates for booking products — confirmation with QR ticket, new-booking provider notification, cancellation with refund copy. Localized (en/pl/uk), brandable, and overridable per call so every app keeps its own voice.
 
