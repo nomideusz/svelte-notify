@@ -1,6 +1,6 @@
 {
   "name": "@nomideusz/svelte-notify",
-  "version": "0.2.2",
+  "version": "0.6.0",
   "description": "Email notification template library for the @nomideusz booking platform.",
   "type": "module",
   "sideEffects": false,
@@ -12,6 +12,10 @@
       "types": "./dist/index.d.ts",
       "svelte": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./transport": {
+      "types": "./dist/transport/index.d.ts",
+      "default": "./dist/transport/index.js"
     }
   },
   "files": [
@@ -33,13 +37,21 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@nomideusz/svelte-qr": "^0.3.0",
-    "@nomideusz/svelte-i18n": "^0.3.3"
+    "@nomideusz/svelte-qr": "^0.4.0",
+    "@nomideusz/svelte-i18n": "^0.4.0"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.0.0",
+    "nodemailer": "^9.0.0"
+  },
+  "peerDependenciesMeta": {
+    "nodemailer": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@types/nodemailer": "^8.0.1",
+    "nodemailer": "^9.0.3",
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.69.1",
     "@sveltejs/package": "^2.5.8",

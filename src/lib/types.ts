@@ -1,4 +1,5 @@
 import type { NotifyOverrides } from './i18n.js';
+import type { Theme } from './theme.js';
 
 export interface BookingNotificationData {
   guestName: string;
@@ -18,6 +19,14 @@ export interface BookingNotificationData {
   language?: string;
   /** Sender identity shown in the footer, e.g. 'thebest.travel'. */
   brand?: string;
+  /** Accent colour and button radius. Usually set once via `createNotifier`. */
+  theme?: Partial<Theme>;
+  /**
+   * IANA zone the times are rendered in, e.g. 'Europe/Warsaw'. Defaults to the
+   * server's zone — pin it, or the same booking reads differently depending on
+   * where the process happens to run.
+   */
+  timeZone?: string;
   /** Per-call copy overrides — replace any message key to keep the app's voice. */
   overrides?: NotifyOverrides;
   /** Optional booking verification URL — if provided, a QR code is inlined in the email. */
@@ -36,7 +45,14 @@ export interface CancellationNotificationData extends BookingNotificationData {
   refundAmount: number;  // in cents, 0 = no refund
 }
 
+export interface ScheduleChangeNotificationData extends BookingNotificationData {
+  /** Where the booking used to sit; `slotStartTime` is the new time. */
+  previousStartTime: Date;
+}
+
 export interface EmailTemplate {
   subject: string;
   html: string;
+  /** `text/plain` alternative. Send it as the alternative part, not instead of `html`. */
+  text: string;
 }

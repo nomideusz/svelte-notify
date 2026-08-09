@@ -3,6 +3,8 @@
 		bookingConfirmationTemplate,
 		cancellationTemplate,
 		providerNotificationTemplate,
+		reminderTemplate,
+		scheduleChangedTemplate,
 		type NotifyLang,
 	} from '$lib/index.js';
 
@@ -10,6 +12,8 @@
 		'Booking confirmation': bookingConfirmationTemplate,
 		'Cancellation': cancellationTemplate,
 		'Provider notification': providerNotificationTemplate,
+		'Reminder': reminderTemplate,
+		'Schedule changed': scheduleChangedTemplate,
 	} as const;
 
 	type TemplateName = keyof typeof TEMPLATES;
@@ -36,6 +40,8 @@
 		// Cancellation-only fields; harmless on the other templates
 		cancelledBy: 'guest' as const,
 		refundAmount: 12000,
+		// Schedule-change-only field; likewise harmless elsewhere
+		previousStartTime: new Date('2026-09-13T18:00:00Z'),
 	});
 
 	const rendered = $derived(TEMPLATES[template](data));
@@ -45,7 +51,7 @@
 	<title>@nomideusz/svelte-notify — email templates</title>
 	<meta
 		name="description"
-		content="Transactional email templates for Svelte 5 apps — booking confirmation, cancellation, provider notification. English, Polish and Ukrainian."
+		content="Transactional email templates for Svelte 5 apps — booking confirmation, cancellation, provider notification, reminder, schedule change. English, Polish and Ukrainian."
 	/>
 </svelte:head>
 
@@ -54,7 +60,7 @@
 		<h1>@nomideusz/svelte-notify</h1>
 		<p class="lede">
 			Transactional email templates as plain functions: pass the booking, get back
-			<code>&lbrace; subject, html &rbrace;</code>. Localized in English, Polish and Ukrainian, with
+			<code>&lbrace; subject, html, text &rbrace;</code>. Localized in English, Polish and Ukrainian, with
 			per-call copy overrides so the app keeps its own voice. QR codes come from
 			<a href="https://www.npmjs.com/package/@nomideusz/svelte-qr">@nomideusz/svelte-qr</a>.
 		</p>
@@ -97,13 +103,17 @@
 			<strong>{rendered.subject}</strong>
 		</div>
 		<iframe title="Email preview" srcdoc={rendered.html}></iframe>
+		<details class="textpart">
+			<summary>text/plain alternative</summary>
+			<pre>{rendered.text}</pre>
+		</details>
 	</section>
 
 	<section class="usage">
 		<h2>Usage</h2>
 		<pre><code>{`import { bookingConfirmationTemplate } from '@nomideusz/svelte-notify';
 
-const { subject, html } = bookingConfirmationTemplate({
+const { subject, html, text } = bookingConfirmationTemplate({
   guestName: 'Anna Kowalska',
   serviceName: 'Sunrise Hatha class',
   slotStartTime: new Date('2026-09-14T07:30:00Z'),
@@ -116,10 +126,86 @@ const { subject, html } = bookingConfirmationTemplate({
   verifyUrl: 'https://example.com/verify/BK-4F92A1',   // inlines a QR code
 });
 
-await sendMail({ to: guest.email, subject, html });`}</code></pre>
+await sendMail({ to: guest.email, subject, html, text });`}</code></pre>
 		<p class="note">
-			The templates are pure functions — no transport, no side effects. Send the result with
-			whatever mailer you already use.
+			The templates are pure functions — no transport, no side effects. Every one returns a
+			<code>text/plain</code> alternative alongside the HTML. Send the result with whatever mailer
+			you already use, or with the SMTP transport below. Date and money formatting comes from
+			<a href="https://www.npmjs.com/package/@nomideusz/svelte-i18n">@nomideusz/svelte-i18n</a>
+			(<code>formatDateTime</code>, <code>formatMoney</code>), so pages and emails share one
+			implementation.
+		</p>
+	</section>
+
+	<section class="usage">
+		<h2>Bind once with createNotifier</h2>
+		<pre><code>{`import { createNotifier } from '@nomideusz/svelte-notify';
+
+// Once, next to your mailer setup:
+const notify = createNotifier({
+  brand: 'szkolyjogi.pl',
+  theme: { accent: '#3f6f4f', radius: '6px' },
+  language: 'pl',                    // default when a message carries none
+  timeZone: 'Europe/Warsaw',         // pin it — all times render in this zone
+  overrides: (lang) => VOICE[lang],  // house voice, resolved per language
+});
+
+// Call sites pass only what varies per message:
+notify.bookingConfirmation(data);    // also: providerNotification,
+notify.reminder(data);               // cancellation, scheduleChanged,
+notify.actionLink({ ... });          // and the action-link shell below`}</code></pre>
+		<p class="note">
+			Per-call values win over the config, key by key — language stays per-recipient even when the
+			app has a default.
+		</p>
+	</section>
+
+	<section class="usage">
+		<h2>One-off emails: the shared shell</h2>
+		<pre><code>{`import { actionLinkTemplate, escapeHtml } from '@nomideusz/svelte-notify';
+
+// Magic link, password reset, invite — the copy is yours, the shell isn't:
+const { subject, html, text } = actionLinkTemplate({
+  subject: 'Sign in to szkolyjogi.pl',        // plain text, never HTML
+  headingHtml: 'Sign in',
+  bodyHtml: '<p>Hi ' + escapeHtml(user.name) + ', this link signs you in.</p>',
+  cta: { label: 'Sign in', url: magicLink },  // label & url escaped for you
+  footnotesHtml: ['The link expires in 15 minutes.'],
+  brand: 'szkolyjogi.pl',
+});`}</code></pre>
+		<p class="note">
+			The escaping contract: templates are trusted, params are not. Fields suffixed
+			<code>Html</code> carry deliberate markup and render as-is — run untrusted values (names
+			typed into public forms) through <code>escapeHtml</code> before composing them in. Plain
+			fields (<code>brand</code>, the <code>cta</code>) are escaped for you.
+			<code>renderLayout</code>, <code>renderText</code> and <code>htmlToText</code> are exported
+			too if you want the card without a subject.
+		</p>
+	</section>
+
+	<section class="usage">
+		<h2>Sending: SMTP transport (server-side)</h2>
+		<pre><code>{`// Server only — needs the optional nodemailer peer: pnpm add nodemailer
+import { createMailer } from '@nomideusz/svelte-notify/transport';
+
+const mailer = createMailer({
+  host: env.SMTP_HOST,          // any of host/user/pass missing ⇒ send()
+  user: env.SMTP_USER,          // throws (safe default); pass onUnconfigured
+  pass: env.SMTP_PASS,          // to log-and-skip instead
+  port: 465,                    // default; secure defaults to port === 465
+  from: 'noreply@example.com',
+  fromName: 'szkolyjogi.pl',    // sent as { name, address }
+  replyTo: 'hello@example.com',
+});
+
+await mailer.send({ to: data.guestEmail, ...notify.bookingConfirmation(data) });
+
+await mailer.canSend();         // transporter.verify(), cached for 60 s`}</code></pre>
+		<p class="note">
+			Transient failures — 4xx SMTP responses and connection errors — are retried with
+			800&nbsp;ms then 1600&nbsp;ms backoff; permanent 5xx is not. Only the
+			<code>/transport</code> subpath imports nodemailer, so the main entry stays pure and
+			browser-safe.
 		</p>
 	</section>
 
@@ -188,7 +274,6 @@ await sendMail({ to: guest.email, subject, html });`}</code></pre>
 		color: #1a1a1a;
 	}
 	select,
-	input[type='text'],
 	input:not([type]) {
 		font: inherit;
 		font-size: 0.9rem;
@@ -223,6 +308,19 @@ await sendMail({ to: guest.email, subject, html });`}</code></pre>
 		border: 0;
 		background: #fff;
 		display: block;
+	}
+	.textpart {
+		border-top: 1px solid #e6e4df;
+	}
+	.textpart summary {
+		padding: 0.6rem 1rem;
+		font-size: 0.8rem;
+		color: #666;
+		cursor: pointer;
+	}
+	.textpart pre {
+		margin: 0;
+		border-radius: 0;
 	}
 	.usage {
 		margin-top: 2.5rem;
@@ -274,8 +372,12 @@ await sendMail({ to: guest.email, subject, html });`}</code></pre>
 			background: #242429;
 			border-color: #33333a;
 		}
+		.textpart {
+			border-color: #33333a;
+		}
 		.lede,
-		.note {
+		.note,
+		.textpart summary {
 			color: #a8a5a0;
 		}
 		code {

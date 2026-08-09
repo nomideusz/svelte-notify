@@ -8,7 +8,13 @@
  * Apps keep their own voice via the `overrides` parameter — any key can be
  * replaced per call ("See you there!" → "Do zobaczenia na macie!").
  */
-import { interpolate } from '@nomideusz/svelte-i18n';
+import { interpolate, formatDateTime, formatMoney } from '@nomideusz/svelte-i18n';
+import { escapeHtml } from './escape.js';
+
+// Re-exported under the names the templates use. The regional policy
+// (en → en-GB) lives in svelte-i18n's `intlLocale`, so it is decided once for
+// pages and emails alike instead of drifting between them.
+export { formatDateTime as formatDate, formatMoney };
 
 export type NotifyLang = 'en' | 'pl' | 'uk';
 
@@ -17,19 +23,6 @@ export function resolveLang(language?: string): NotifyLang {
   if (l.startsWith('pl')) return 'pl';
   if (l.startsWith('uk')) return 'uk';
   return 'en';
-}
-
-const LOCALE: Record<NotifyLang, string> = { en: 'en-GB', pl: 'pl-PL', uk: 'uk-UA' };
-
-export function formatDate(d: Date, lang: NotifyLang): string {
-  return d.toLocaleString(LOCALE[lang], {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
-
-export function formatMoney(cents: number, currency: string, lang: NotifyLang): string {
-  return new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency }).format(cents / 100);
 }
 
 export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
@@ -66,6 +59,19 @@ export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
       'You will receive a full refund of {amount} within 5–10 business days — no action is needed on your side.',
     c_no_refund: 'No refund applies per the cancellation policy.',
     c_no_payment: 'No payment was taken for this booking.',
+
+    r_subject: 'Reminder: {service} — {date}',
+    r_heading: 'Booking reminder',
+    r_body: 'A reminder about your upcoming booking:',
+    r_ticket: 'Your ticket, and the cancellation link:',
+
+    s_subject: 'Schedule change: {service}',
+    s_heading: 'Your booking has been rescheduled',
+    s_body: 'The organizer moved a booking of yours:',
+    s_from: 'Was',
+    s_to: 'Now',
+    s_keep: 'Your booking moves to the new time automatically — nothing to do.',
+    s_cancel: "If the new time doesn't work for you, you can cancel free of charge:",
   },
   pl: {
     b_subject: 'Rezerwacja potwierdzona: {service} — nr {ref}',
@@ -100,6 +106,19 @@ export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
       'Otrzymasz pełny zwrot {amount} w ciągu 5–10 dni roboczych — nie musisz nic robić.',
     c_no_refund: 'Zgodnie z polityką anulowania zwrot nie przysługuje.',
     c_no_payment: 'Za tę rezerwację nie pobrano płatności.',
+
+    r_subject: 'Przypomnienie: {service} — {date}',
+    r_heading: 'Przypomnienie o rezerwacji',
+    r_body: 'Przypominamy o nadchodzącej rezerwacji:',
+    r_ticket: 'Twój bilet z kodem QR (i możliwość odwołania):',
+
+    s_subject: 'Zmiana terminu: {service}',
+    s_heading: 'Zmiana terminu rezerwacji',
+    s_body: 'Organizator przeniósł termin Twojej rezerwacji:',
+    s_from: 'Było',
+    s_to: 'Jest',
+    s_keep: 'Twoja rezerwacja przechodzi na nowy termin automatycznie — nie musisz nic robić.',
+    s_cancel: 'Jeśli nowy termin Ci nie pasuje, możesz bezpłatnie odwołać rezerwację:',
   },
   uk: {
     b_subject: 'Бронювання підтверджено: {service} — № {ref}',
@@ -134,14 +153,56 @@ export const NOTIFY_MESSAGES: Record<NotifyLang, Record<string, string>> = {
       'Ви отримаєте повне повернення {amount} протягом 5–10 робочих днів — жодних дій не потрібно.',
     c_no_refund: 'Згідно з політикою скасування повернення не передбачено.',
     c_no_payment: 'Оплату за це бронювання не стягнуто.',
+
+    r_subject: 'Нагадування: {service} — {date}',
+    r_heading: 'Нагадування про бронювання',
+    r_body: 'Нагадуємо про найближче бронювання:',
+    r_ticket: 'Ваш квиток з QR-кодом (і можливість скасування):',
+
+    s_subject: 'Зміна розкладу: {service}',
+    s_heading: 'Зміна часу бронювання',
+    s_body: 'Організатор переніс ваше бронювання:',
+    s_from: 'Було',
+    s_to: 'Тепер',
+    s_keep: 'Ваше бронювання автоматично переходить на новий час — нічого робити не треба.',
+    s_cancel: 'Якщо новий час не підходить, ви можете безкоштовно скасувати бронювання:',
   },
 };
 
 export type NotifyOverrides = Partial<Record<string, string>>;
 
-/** Per-call translator: overrides → language dictionary → English fallback. */
+export type TranslateParams = Record<string, string | number | null | undefined>;
+
+function escapeParams(params?: TranslateParams): Record<string, string> | undefined {
+  if (!params) return undefined;
+  const escaped: Record<string, string> = {};
+  for (const key of Object.keys(params)) escaped[key] = escapeHtml(params[key]);
+  return escaped;
+}
+
+/**
+ * Per-call translator: overrides → language dictionary → English fallback.
+ *
+ * Returns one translator per output context, because escaping is correct in
+ * exactly one of them:
+ *
+ * - `t`     — HTML bodies. Params are escaped; the message template is not, so
+ *             built-in and overridden copy keeps its deliberate `<strong>`.
+ * - `tText` — plain-text contexts, i.e. subject lines. Nothing is escaped;
+ *             an inbox shows `&amp;` literally.
+ *
+ * Splitting them at the factory rather than adding an `escape: false` flag
+ * means the call site names its context and can't silently pick the wrong one.
+ */
 export function makeT(language?: string, overrides?: NotifyOverrides) {
   const lang = resolveLang(language);
-  return (key: string, params?: Record<string, string | number>): string =>
-    interpolate(overrides?.[key] ?? NOTIFY_MESSAGES[lang][key] ?? NOTIFY_MESSAGES.en[key] ?? key, params);
+  const lookup = (key: string): string =>
+    overrides?.[key] ?? NOTIFY_MESSAGES[lang][key] ?? NOTIFY_MESSAGES.en[key] ?? key;
+
+  return {
+    t: (key: string, params?: TranslateParams): string =>
+      interpolate(lookup(key), escapeParams(params)),
+    tText: (key: string, params?: TranslateParams): string =>
+      interpolate(lookup(key), params as Record<string, string | number> | undefined),
+  };
 }
