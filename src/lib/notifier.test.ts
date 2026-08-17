@@ -54,6 +54,25 @@ describe('createNotifier', () => {
 		expect(html).not.toContain('House voice');
 	});
 
+	it('renders a date span only when the slot crosses the day in the given zone', () => {
+		const notify = createNotifier({ timeZone: 'Europe/Warsaw' });
+		// Weekend workshop: Sat 08:00 → Sun 13:00 Warsaw time.
+		const workshop = notify.bookingConfirmation({
+			...booking,
+			slotStartTime: new Date('2026-07-18T06:00:00Z'),
+			slotEndTime: new Date('2026-07-19T11:00:00Z'),
+		});
+		expect(workshop.html).toMatch(/18.*–.*19/s);
+		// Same-day class keeps the single timestamp even with an end provided.
+		const single = notify.bookingConfirmation({
+			...booking,
+			slotStartTime: new Date('2026-07-18T06:00:00Z'), // 08:00 Warsaw
+			slotEndTime: new Date('2026-07-18T07:30:00Z'), // 09:30 Warsaw
+		});
+		expect(single.html).toContain('08:00');
+		expect(single.html).not.toContain('09:30');
+	});
+
 	it('binds brand and theme onto actionLink too', () => {
 		const notify = createNotifier({ brand: 'thebest.travel', theme: { radius: '9999px' } });
 		const { html } = notify.actionLink({

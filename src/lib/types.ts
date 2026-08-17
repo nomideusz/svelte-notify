@@ -8,6 +8,12 @@ export interface BookingNotificationData {
   /** What was booked — a class, an appointment, a tour. */
   serviceName: string;
   slotStartTime: Date;
+  /**
+   * When the booked slot ends. Optional: only rendered when it falls on a
+   * different calendar day than the start (a workshop, a retreat, a
+   * multi-day tour) — same-day classes keep the single timestamp.
+   */
+  slotEndTime?: Date;
   participants: number;
   totalAmount: number;   // in cents
   currency: string;      // ISO 4217, e.g. 'PLN'

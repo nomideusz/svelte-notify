@@ -1,6 +1,6 @@
 import type { BookingNotificationData, EmailTemplate } from '../types.js';
 import { getQrMatrix, matrixToSvg } from '@nomideusz/svelte-qr';
-import { formatDate, formatMoney, makeT, resolveLang } from '../i18n.js';
+import { formatDateSpan, formatMoney, makeT, resolveLang } from '../i18n.js';
 import { escapeHtml as e } from '../escape.js';
 import { renderLayout, renderText } from '../layout.js';
 import { resolveTheme } from '../theme.js';
@@ -40,7 +40,7 @@ export function bookingConfirmationTemplate(data: BookingNotificationData): Emai
   const body = (qrBlock: string) => `
         <p style="margin:0 0 16px;">${t('b_body', { service: data.serviceName })}</p>
         <ul style="margin:0;padding-left:20px;">
-          <li>${t('b_date')}: ${e(formatDate(data.slotStartTime, lang, data.timeZone))}</li>
+          <li>${t('b_date')}: ${e(formatDateSpan(data.slotStartTime, data.slotEndTime, lang, data.timeZone))}</li>
           <li>${t('b_participants')}: ${e(data.participants)}</li>
           <li>${t('b_total')}: ${e(formatMoney(data.totalAmount, data.currency, lang))}</li>
           <li>${t('b_ref')}: <strong>${e(data.bookingReference)}</strong></li>

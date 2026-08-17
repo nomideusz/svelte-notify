@@ -16,6 +16,32 @@ import { escapeHtml } from './escape.js';
 // pages and emails alike instead of drifting between them.
 export { formatDateTime as formatDate, formatMoney };
 
+/**
+ * "One day or a range?" for a slot's rendered time. Multi-day slots
+ * (workshops, retreats, multi-day tours) print "start – end"; everything
+ * else keeps the single timestamp. Zone-aware: the calendar day is the
+ * recipient's, not the server's.
+ */
+export function formatDateSpan(
+  start: Date,
+  end: Date | undefined,
+  language?: string,
+  timeZone?: string,
+): string {
+  const one = formatDateTime(start, resolveLang(language), timeZone);
+  if (!end) return one;
+  const key = (d: Date) =>
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d);
+  return key(start) === key(end)
+    ? one
+    : `${one} – ${formatDateTime(end, resolveLang(language), timeZone)}`;
+}
+
 export type NotifyLang = 'en' | 'pl' | 'uk';
 
 export function resolveLang(language?: string): NotifyLang {

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.1 — 2026-08-17
+
+### Changed
+- Depends on `@nomideusz/svelte-i18n` ^0.5.0; `@types/nodemailer` declared as an optional peer so `./transport` types resolve for consumers.
+
+### Added
+- `BookingNotificationData.slotEndTime?: Date` — when the booked slot ends on
+  a different calendar day than it starts (a workshop, a retreat, a multi-day
+  tour), `bookingConfirmation` and `guideNotification` render the date as a
+  "start – end" span. Same-day slots keep the single timestamp; omitting the
+  field keeps the old behavior exactly. Zone-aware via the existing
+  `timeZone`. New helper `formatDateSpan` exported from the i18n module.
+
 ## 0.6.0 — 2026-08-09
 
 ### Added

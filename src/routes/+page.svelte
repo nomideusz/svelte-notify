@@ -6,7 +6,7 @@
 		reminderTemplate,
 		scheduleChangedTemplate,
 		type NotifyLang,
-	} from '$lib/index.js';
+	} from '#lib/index.js';
 
 	const TEMPLATES = {
 		'Booking confirmation': bookingConfirmationTemplate,

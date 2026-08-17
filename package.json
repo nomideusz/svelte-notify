@@ -1,6 +1,6 @@
 {
   "name": "@nomideusz/svelte-notify",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Email notification template library for the @nomideusz booking platform.",
   "type": "module",
   "sideEffects": false,
@@ -24,6 +24,10 @@
     "!dist/**/*.test.*",
     "!dist/**/*.spec.*"
   ],
+  "imports": {
+    "#lib": "./src/lib",
+    "#lib/*": "./src/lib/*"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -37,30 +41,34 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@nomideusz/svelte-qr": "^0.4.0",
-    "@nomideusz/svelte-i18n": "^0.4.0"
+    "@nomideusz/svelte-i18n": "^0.5.0",
+    "@nomideusz/svelte-qr": "^0.4.0"
   },
   "peerDependencies": {
+    "nodemailer": "^9.0.0",
     "svelte": "^5.0.0",
-    "nodemailer": "^9.0.0"
+    "@types/nodemailer": ">=6"
   },
   "peerDependenciesMeta": {
     "nodemailer": {
       "optional": true
+    },
+    "@types/nodemailer": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@sveltejs/adapter-auto": "8.0.0-next.3",
+    "@sveltejs/kit": "3.0.0-next.23",
+    "@sveltejs/package": "3.0.0-next.7",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@types/nodemailer": "^8.0.1",
     "nodemailer": "^9.0.3",
-    "@sveltejs/adapter-auto": "^7.0.1",
-    "@sveltejs/kit": "^2.69.1",
-    "@sveltejs/package": "^2.5.8",
-    "@sveltejs/vite-plugin-svelte": "^6.2.4",
-    "svelte": "^5.56.4",
+    "svelte": "^5.56.9",
     "svelte-check": "^4.7.1",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.6",
-    "vitest": "^4.1.9"
+    "typescript": "^6.0.3",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   },
   "keywords": [
     "svelte",
