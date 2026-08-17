@@ -41,13 +41,13 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@nomideusz/svelte-i18n": "^0.5.0",
+    "@nomideusz/svelte-i18n": "^0.5.1",
     "@nomideusz/svelte-qr": "^0.4.0"
   },
   "peerDependencies": {
+    "@types/nodemailer": ">=6",
     "nodemailer": "^9.0.0",
-    "svelte": "^5.0.0",
-    "@types/nodemailer": ">=6"
+    "svelte": "^5.0.0"
   },
   "peerDependenciesMeta": {
     "nodemailer": {
@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "8.0.0-next.3",
+    "@sveltejs/adapter-vercel": "7.0.0-next.6",
     "@sveltejs/kit": "3.0.0-next.23",
     "@sveltejs/package": "3.0.0-next.7",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
