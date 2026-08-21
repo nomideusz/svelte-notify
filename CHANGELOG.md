@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- 1.0.0 — no code change; the promise, made on evidence. The API survived its
+  external-consumer stress test: panel-lab adopted the package as its outbox's
+  sender (layout rendering in the recipient's stored locale at delivery time,
+  transport with unconfigured-throws keeping queued rows honest) and needed
+  zero package changes — the pure main entry, the `./transport` seam with
+  nodemailer as an optional peer, and the throw-by-default unconfigured
+  behavior all held exactly as designed. Nine test files, no TODOs, no source
+  churn since 0.7.0's per-message sender overrides. From here, anything that
+  breaks a consumer costs a major.
+
 ## 0.7.3
 
 ### Patch Changes
