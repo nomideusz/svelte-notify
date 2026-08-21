@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @nomideusz/svelte-i18n@1.0.0
+
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies [e0ef585]
+  - @nomideusz/svelte-i18n@0.6.0
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [6bd4ac9]
+  - @nomideusz/svelte-qr@1.0.0
+
+## 0.7.0 — 2026-08-18
+
+### Added
+- Per-message sender overrides on `SendInput`: `from`, `fromName` and
+  `envelopeFrom`. For a sender the authenticated account owns but the mailer
+  isn't bound to — e.g. a sub-address (`wiadomosci+<id>@…`) as the visible
+  `From` so replies route back to one polled inbox, with `envelopeFrom` as the
+  bare address because many servers refuse a sub-address as MAIL FROM.
+  Omitting all three keeps existing callers byte-identical.
+
 ## 0.6.1 — 2026-08-17
 
 ### Changed

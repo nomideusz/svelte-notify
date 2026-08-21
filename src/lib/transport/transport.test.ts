@@ -211,3 +211,36 @@ describe('createMailer — canSend cache', () => {
     expect(verify).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('per-message sender overrides', () => {
+  it('sends From the override with the envelope sender kept separate', async () => {
+    const sendMail = vi.fn(async (_opts: Record<string, unknown>) => ({ messageId: '1' }));
+    const { factory } = fakeTransport(sendMail);
+    const mailer = createMailer({ ...CONFIGURED, createTransport: factory, log: silentLog });
+    await mailer.send({
+      ...MSG,
+      from: 'wiadomosci+school-x@example.com',
+      fromName: 'Studio X',
+      envelopeFrom: 'wiadomosci@example.com',
+    });
+    // The From header is the sub-address (so every client's reply comes back
+    // to it); MAIL FROM stays the account the session authenticated as.
+    expect(sendMail.mock.calls[0][0].from).toEqual({
+      name: 'Studio X',
+      address: 'wiadomosci+school-x@example.com',
+    });
+    expect(sendMail.mock.calls[0][0].envelope).toEqual({
+      from: 'wiadomosci@example.com',
+      to: [MSG.to],
+    });
+  });
+
+  it('leaves the envelope to nodemailer when no envelopeFrom is given', async () => {
+    const sendMail = vi.fn(async (_opts: Record<string, unknown>) => ({ messageId: '1' }));
+    const { factory } = fakeTransport(sendMail);
+    const mailer = createMailer({ ...CONFIGURED, fromName: 'Brand', createTransport: factory, log: silentLog });
+    await mailer.send(MSG);
+    expect(sendMail.mock.calls[0][0].envelope).toBeUndefined();
+    expect(sendMail.mock.calls[0][0].from).toEqual({ name: 'Brand', address: CONFIGURED.from });
+  });
+});

@@ -29,6 +29,20 @@ export interface SendInput {
   text?: string;
   /** Overrides the mailer-level `replyTo` for this message. */
   replyTo?: string;
+  /**
+   * Overrides the mailer-level `from` (and `fromName`) for this message —
+   * for a sender the authenticated account owns but the mailer isn't bound to,
+   * e.g. a sub-address that routes replies back to one inbox.
+   */
+  from?: string;
+  fromName?: string;
+  /**
+   * SMTP envelope sender, when it must differ from the `From` header (a
+   * sub-address is a legitimate `From` but many servers refuse it as MAIL
+   * FROM). Absent ⇒ nodemailer derives the envelope from the header, which is
+   * what every existing caller gets.
+   */
+  envelopeFrom?: string;
 }
 
 export interface MailerLog {
@@ -155,13 +169,20 @@ export function createMailer(config: MailerConfig): Mailer {
         throw new Error('SMTP transport not configured (host/user/pass missing)');
       }
 
+      const fromAddress = msg.from ?? config.from;
+      const fromName = msg.from ? msg.fromName : (msg.fromName ?? config.fromName);
       const envelope = {
-        from: config.fromName ? { name: config.fromName, address: config.from } : config.from,
+        from: fromName ? { name: fromName, address: fromAddress } : fromAddress,
         to: msg.to,
         replyTo: msg.replyTo ?? config.replyTo,
         subject: msg.subject,
         html: msg.html,
         text: msg.text,
+        // Only when asked: nodemailer's own derivation is what every caller
+        // before this option relied on.
+        ...(msg.envelopeFrom
+          ? { envelope: { from: msg.envelopeFrom, to: Array.isArray(msg.to) ? msg.to : [msg.to] } }
+          : {}),
       };
 
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
