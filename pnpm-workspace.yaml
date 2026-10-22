@@ -4,6 +4,3 @@ packages:
   - '.'
 allowBuilds:
   esbuild: true
-minimumReleaseAgeExclude:
-  - '@nomideusz/svelte-i18n@1.0.0'
-  - '@nomideusz/svelte-qr@1.0.0'

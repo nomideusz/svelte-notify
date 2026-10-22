@@ -235,6 +235,18 @@ describe('per-message sender overrides', () => {
     });
   });
 
+  it('puts cc in the header and the explicit envelope', async () => {
+    const sendMail = vi.fn(async (_opts: Record<string, unknown>) => ({ messageId: '1' }));
+    const { factory } = fakeTransport(sendMail);
+    const mailer = createMailer({ ...CONFIGURED, createTransport: factory, log: silentLog });
+    await mailer.send({ ...MSG, cc: 'cc@example.com', envelopeFrom: 'wiadomosci@example.com' });
+    expect(sendMail.mock.calls[0][0].cc).toBe('cc@example.com');
+    expect(sendMail.mock.calls[0][0].envelope).toEqual({
+      from: 'wiadomosci@example.com',
+      to: [MSG.to, 'cc@example.com'],
+    });
+  });
+
   it('leaves the envelope to nodemailer when no envelopeFrom is given', async () => {
     const sendMail = vi.fn(async (_opts: Record<string, unknown>) => ({ messageId: '1' }));
     const { factory } = fakeTransport(sendMail);

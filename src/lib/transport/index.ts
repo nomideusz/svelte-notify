@@ -23,10 +23,16 @@ import type { Transporter } from 'nodemailer';
 
 export interface SendInput {
   to: string | string[];
+  /** Carbon copy — the same addresses go into the SMTP envelope. */
+  cc?: string | string[];
   subject: string;
-  html: string;
+  /** Omit for a text-only message — what cold outreach wants (no card, no
+   *  images, reads as a personal mail instead of a campaign). */
+  html?: string;
   /** `text/plain` alternative — every packaged template returns one. */
   text?: string;
+  /** Extra headers, e.g. `List-Unsubscribe`. Passed to nodemailer as-is. */
+  headers?: Record<string, string>;
   /** Overrides the mailer-level `replyTo` for this message. */
   replyTo?: string;
   /**
@@ -43,6 +49,14 @@ export interface SendInput {
    * what every existing caller gets.
    */
   envelopeFrom?: string;
+  /**
+   * A calendar invitation riding along as a `text/calendar` part (nodemailer's
+   * `icalEvent`): mail clients render it as an invite card with Accept /
+   * Decline, and the reply comes back as mail. `content` is the full
+   * VCALENDAR text; `method` is its METHOD (REQUEST to invite, CANCEL to call
+   * it off).
+   */
+  icalEvent?: { method: 'REQUEST' | 'CANCEL'; content: string };
 }
 
 export interface MailerLog {
@@ -174,14 +188,17 @@ export function createMailer(config: MailerConfig): Mailer {
       const envelope = {
         from: fromName ? { name: fromName, address: fromAddress } : fromAddress,
         to: msg.to,
+        ...(msg.cc ? { cc: msg.cc } : {}),
         replyTo: msg.replyTo ?? config.replyTo,
         subject: msg.subject,
         html: msg.html,
         text: msg.text,
+        ...(msg.headers ? { headers: msg.headers } : {}),
+        ...(msg.icalEvent ? { icalEvent: msg.icalEvent } : {}),
         // Only when asked: nodemailer's own derivation is what every caller
         // before this option relied on.
         ...(msg.envelopeFrom
-          ? { envelope: { from: msg.envelopeFrom, to: Array.isArray(msg.to) ? msg.to : [msg.to] } }
+          ? { envelope: { from: msg.envelopeFrom, to: [msg.to, msg.cc ?? []].flat() } }
           : {}),
       };
 

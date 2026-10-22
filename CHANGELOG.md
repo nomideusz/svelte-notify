@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- `SendInput.cc` — carbon-copy addresses on a message. They go into the `Cc`
+  header and, when `envelopeFrom` is set, into the SMTP envelope recipients
+  as well, so an explicit envelope never drops a copy.
+
+## 1.0.1
+
+### Patch Changes
+
+- `SendInput.icalEvent` — a `text/calendar` part (nodemailer's `icalEvent`)
+  riding along with a message, so a mail can carry a calendar invitation.
+
 ## 1.0.0
 
 ### Major Changes
