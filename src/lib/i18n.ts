@@ -8,13 +8,28 @@
  * Apps keep their own voice via the `overrides` parameter — any key can be
  * replaced per call ("See you there!" → "Do zobaczenia na macie!").
  */
-import { interpolate, formatDateTime, formatMoney } from '@nomideusz/svelte-i18n';
+import { interpolate, formatDateTime, formatMoney as formatMinor } from '@nomideusz/svelte-i18n';
 import { escapeHtml } from './escape.js';
 
 // Re-exported under the names the templates use. The regional policy
 // (en → en-GB) lives in svelte-i18n's `intlLocale`, so it is decided once for
 // pages and emails alike instead of drifting between them.
-export { formatDateTime as formatDate, formatMoney };
+export { formatDateTime as formatDate };
+
+/**
+ * svelte-i18n's `formatMoney`, refusing what cannot be minor units. A price in
+ * major units (151.73 from svelte-scheduler's `calculatePrice`) would otherwise
+ * render a hundred times too small, in a mail that has already gone out.
+ */
+export function formatMoney(minorUnits: number, currency: string, language: string): string {
+  if (!Number.isSafeInteger(minorUnits) || minorUnits < 0) {
+    throw new TypeError(
+      `svelte-notify: amounts are integer minor units (grosze, cents), got ${minorUnits}. ` +
+        'Convert major units with Math.round(amount * 100).',
+    );
+  }
+  return formatMinor(minorUnits, currency, language);
+}
 
 /**
  * "One day or a range?" for a slot's rendered time. Multi-day slots

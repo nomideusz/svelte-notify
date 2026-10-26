@@ -41,4 +41,10 @@ describe('bookingConfirmationTemplate', () => {
     expect(typeof result.subject).toBe('string');
     expect(typeof result.html).toBe('string');
   });
+
+  it('reads totalAmount as minor units: 15173 grosze is 151,73 zł', () => {
+    const { text } = bookingConfirmationTemplate({ ...base, totalAmount: 15173, language: 'pl' });
+    expect(text).toMatch(/151,73\s*zł/);
+    expect(() => bookingConfirmationTemplate({ ...base, totalAmount: 151.73 })).toThrow(/minor units/);
+  });
 });

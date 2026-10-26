@@ -1,6 +1,6 @@
 {
   "name": "@nomideusz/svelte-notify",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Email notification template library for the @nomideusz booking platform.",
   "type": "module",
   "sideEffects": false,
@@ -82,5 +82,5 @@
     "type": "git",
     "url": "https://github.com/nomideusz/svelte-notify"
   },
-  "homepage": "https://svelte-notify.vercel.app/"
+  "homepage": "https://svelte-notify.zaur.app/"
 }

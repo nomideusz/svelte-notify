@@ -15,8 +15,14 @@ export interface BookingNotificationData {
    */
   slotEndTime?: Date;
   participants: number;
-  totalAmount: number;   // in cents
-  currency: string;      // ISO 4217, e.g. 'PLN'
+  /**
+   * Integer minor units (grosze, cents): 15173 is 151,73 zł. Not major units —
+   * svelte-scheduler's prices are, so convert with `Math.round(x * 100)`.
+   * A non-integer throws rather than mailing a wrong amount.
+   */
+  totalAmount: number;
+  /** ISO 4217, e.g. 'PLN'. */
+  currency: string;
   bookingReference: string;
   /** Who delivers the service — instructor, guide, stylist. */
   providerName?: string;
@@ -48,7 +54,8 @@ export interface BookingNotificationData {
 
 export interface CancellationNotificationData extends BookingNotificationData {
   cancelledBy: 'guest' | 'guide' | 'system';
-  refundAmount: number;  // in cents, 0 = no refund
+  /** Integer minor units, like `totalAmount`; 0 = no refund. */
+  refundAmount: number;
 }
 
 export interface ScheduleChangeNotificationData extends BookingNotificationData {

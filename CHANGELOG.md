@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+### Patch Changes
+
+- 2e2b85b: `totalAmount` and `refundAmount` say in their published types that they are integer minor units (grosze, cents), and a template given anything else (151.73 straight from svelte-scheduler's `calculatePrice`, or a negative it would print) throws a `TypeError` naming the fix instead of mailing an amount a hundred times too small. The unit was only in source comments, which the `.d.ts` dropped.
+
 ## 1.1.0
 
 ### Minor Changes

@@ -57,4 +57,8 @@ describe('cancellationTemplate', () => {
     const { subject } = cancellationTemplate({ ...base, language: 'de' });
     expect(subject).toContain('Booking cancelled');
   });
+
+  it('refuses an amount in major units instead of mailing it 100× too small', () => {
+    expect(() => cancellationTemplate({ ...base, refundAmount: 75.86 })).toThrow(/minor units/);
+  });
 });
