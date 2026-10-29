@@ -2,6 +2,8 @@
 
 [![npm](https://badgen.net/npm/v/@nomideusz/svelte-notify)](https://www.npmjs.com/package/@nomideusz/svelte-notify) [![license](https://badgen.net/badge/license/MIT/blue)](https://github.com/nomideusz/svelte-notify/blob/main/LICENSE)
 
+**[Live demo → svelte.zaur.app/notify](https://svelte.zaur.app/notify)**
+
 Transactional email templates for booking products — confirmation with QR ticket, new-booking provider notification, cancellation with refund copy. Localized (en/pl/uk), brandable, and overridable per call so every app keeps its own voice.
 
 Pairs with [@nomideusz/svelte-scheduler](https://www.npmjs.com/package/@nomideusz/svelte-scheduler) and [@nomideusz/svelte-payments](https://www.npmjs.com/package/@nomideusz/svelte-payments); QR codes via [@nomideusz/svelte-qr](https://www.npmjs.com/package/@nomideusz/svelte-qr).
