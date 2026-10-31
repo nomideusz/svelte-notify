@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2
+
+### Patch Changes
+
+- The `nodemailer` peer accepts 10 as well as 9 (`^9.0.0 || ^10.0.0`). The transport's options (envelope, headers, `icalEvent`, `tls.servername`) work unchanged; the tests run on 10.3.1. Needs svelte-qr 1.0.1.
+
 ## 1.1.1
 
 ### Patch Changes

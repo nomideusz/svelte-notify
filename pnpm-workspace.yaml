@@ -4,3 +4,5 @@ packages:
   - '.'
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@nomideusz/svelte-qr@1.0.1'
